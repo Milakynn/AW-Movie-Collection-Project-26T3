@@ -4,37 +4,36 @@ import { Col } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { Form } from "react-bootstrap";
+import { Carousel }  from "react-bootstrap";
+
+import { useEffect } from "react";
+import { useState } from "react";
 
 import { Link } from "react-router";
-import Carousel  from 'react-bootstrap/Carousel'
+
+interface Movie {
+  movie_id: string;
+  title: string;
+  description: string;
+  genre: string;
+  release_year: string;
+  runtime: string;
+  image_url: string;
+  rating: string;
+}
 
 export function HomeFeed() {
-  const movies = [
-    {
-      id: 1,
-      title: "Interstellar",
-      genre: "Sci-Fi",
-      rating: 8.9,
-      image:
-        "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500",
-    },
-    {
-      id: 2,
-      title: "Dune",
-      genre: "Adventure",
-      rating: 8.4,
-      image:
-        "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500",
-    },
-    {
-      id: 3,
-      title: "Blade Runner",
-      genre: "Sci-Fi",
-      rating: 8.2,
-      image:
-        "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=500",
-    },
-  ];
+  
+    const [movies, setMovies] = useState<Movie[]>([]);
+    useEffect(() => {
+    fetch("http://localhost/cinecollect-api/getMovies.php")
+        .then((response) => response.json())
+        .then((data) => {
+        setMovies(data);
+        console.log(data);
+        })
+        .catch((error) => console.error(error));
+    }, []);
 
   return (
     <Container fluid className="bg-dark text-light min-vh-100 p-4">
@@ -60,8 +59,15 @@ export function HomeFeed() {
       </Form>
 
       <h2 className="fw-bold mb-4">Trending Now</h2>
+      {/* <div className="mb-4">
+    {movies.map((movie) => (
+        <p key={movie.movie_id}>
+        {movie.title}
+        </p>
+    ))}
+    </div> */}
 
-        <Carousel className="mb-5" interval={3000} pause={false}>
+        {/* <Carousel className="mb-5" interval={3000} pause={false}>
 
         <Carousel.Item>
             <img
@@ -126,7 +132,46 @@ export function HomeFeed() {
             </Carousel.Caption>
         </Carousel.Item>
 
-        </Carousel>
+        </Carousel> */}
+
+        {/* New one */}
+        <Carousel
+  className="mb-5"
+  interval={5000}
+  pause={false}
+  wrap={true}
+>
+  {movies.map((movie) => (
+    <Carousel.Item key={movie.movie_id}>
+      <img
+        className="d-block w-100"
+        src={
+          movie.image_url ||
+          "https://via.placeholder.com/1200x400"
+        }
+        alt={movie.title}
+        style={{
+          height: "400px",
+          objectFit: "cover"
+        }}
+      />
+
+      <Carousel.Caption>
+        <h3>{movie.title}</h3>
+
+        <p>
+          ⭐ {movie.rating} • {movie.genre}
+        </p>
+
+        <Button
+          href={`/movie/${movie.movie_id}`}
+        >
+          View Details
+        </Button>
+      </Carousel.Caption>
+    </Carousel.Item>
+  ))}
+</Carousel>
 
       <h2 className="fw-bold mb-3">Categories</h2>
 
@@ -156,7 +201,7 @@ export function HomeFeed() {
 
       <h3 className="mt-5 mb-3">Latest Reviews</h3>
 
-        <Row className="g-3">
+        {/* <Row className="g-3">
             <Col md={4}>
                 <Card bg="secondary" text="light">
                 <Card.Body>
@@ -198,7 +243,49 @@ export function HomeFeed() {
                 </Card.Body>
                 </Card>
             </Col>
-        </Row>
+        </Row> */}
+
+        {/* new one */}
+        <h2 className="fw-bold mb-4">
+  Browse Movies
+</h2>
+
+<Row className="g-4 mb-5">
+  {movies.map((movie) => (
+    <Col md={4} key={movie.movie_id}>
+      <Card
+        bg="secondary"
+        text="light"
+        className="h-100"
+      >
+        <Card.Body>
+          <Card.Title>
+            {movie.title}
+          </Card.Title>
+
+          <Card.Text>
+            Genre: {movie.genre}
+          </Card.Text>
+
+          <Card.Text>
+            ⭐ {movie.rating}
+          </Card.Text>
+
+          <Card.Text>
+            {movie.description.substring(0, 100)}...
+          </Card.Text>
+
+          <Button
+            href={`/movie/${movie.movie_id}`}
+            variant="primary"
+          >
+            View Details
+          </Button>
+        </Card.Body>
+      </Card>
+    </Col>
+  ))}
+</Row>
 
         <Button href="/review" variant="primary"
         style={{
