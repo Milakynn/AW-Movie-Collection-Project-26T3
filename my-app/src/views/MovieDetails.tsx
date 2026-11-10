@@ -23,15 +23,15 @@ interface Movie {
 }
 
 // Connects to getCast database
-interface CastMember {
-    actor_name: string;
-}
+// interface CastMember {
+//     actor_name: string;
+// }
 
 // Connects to getReviews database
-interface Review {
-    review_text: string;
-    review_rating: string;
-}
+// interface Review {
+//     review_text: string;
+//     review_rating: string;
+// }
 
 export function MovieDetails() {
 
@@ -39,9 +39,9 @@ export function MovieDetails() {
 
   const [movie, setMovie] = useState<Movie | null>(null);
 
-  const [cast, setCast] = useState<CastMember[]>([]);
+  // const [cast, setCast] = useState<CastMember[]>([]);
 
-  const [reviews, setReviews] = useState<Review[]>([]);
+  // const [reviews, setReviews] = useState<Review[]>([]);
 
   useEffect(() => {
     fetch(
@@ -56,25 +56,32 @@ export function MovieDetails() {
     return <h2>Loading movie...</h2>;
   }
 
-  useEffect(() => {
+  // Cast
+  // useEffect(() => {
 
-    fetch(
-      `http://localhost/cinecollect-api/getCast.php?movie_id=${id}`
-    )
-      .then((response) => response.json())
-      .then((data) => setCast(data));
+  //   fetch(
+  //     `http://localhost/cinecollect-api/getCast.php?movie_id=${id}`
+  //   )
+  //     .then((response) => response.json())
+  //     .then((data) => {
+  //       setCast(data)
+  //       console.log(data)
+  //     })
+  //     .catch((error) => console.error(error));
 
-  }, [id]);
 
-  useEffect(() => {
+  // }, [id]);
 
-    fetch(
-      `http://localhost/cinecollect-api/getReviews.php?movie_id=${id}`
-    )
-      .then((response) => response.json())
-      .then((data) => setReviews(data));
+  // Reviews
+  // useEffect(() => {
 
-  }, [id]);
+  //   fetch(
+  //     `http://localhost/cinecollect-api/getReviews.php?movie_id=${id}`
+  //   )
+  //     .then((response) => response.json())
+  //     .then((data) => setReviews(data));
+
+  // }, [id]);
 
   return (
     <Container className="py-4">
@@ -130,11 +137,11 @@ export function MovieDetails() {
           <Card.Title>Cast</Card.Title>
 
           <ListGroup variant="flush">
-            {cast.map((actor, index) => (
+            {/* {cast.map((actor, index) => (
               <ListGroup.Item key={index}>
                   {actor.actor_name}
               </ListGroup.Item>
-            ))}
+            ))} */}
           </ListGroup>
         </Card.Body>
       </Card>
@@ -142,13 +149,13 @@ export function MovieDetails() {
       <Card>
         <Card.Body>
           <Card.Title>Community Reviews</Card.Title>
-          {reviews.map((review, index) => (
+          {/* {reviews.map((review, index) => (
             <p key={index}>
                 ⭐ {review.review_rating}
                 {" "}
                 {review.review_text}
             </p>
-          ))}
+          ))} */}
         </Card.Body>
       </Card>
 
