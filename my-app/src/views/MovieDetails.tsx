@@ -5,7 +5,77 @@ import { Card } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { ListGroup } from "react-bootstrap";
 
+//link to backend
+import { useState } from "react";
+import { useEffect } from "react";
+import { useParams } from "react-router";
+
+// Connects to getMovies database
+interface Movie {
+    movie_id: string;
+    title: string;
+    description: string;
+    genre: string;
+    release_year: string;
+    runtime: string;
+    image_url: string;
+    rating: string;
+}
+
+// Connects to getCast database
+interface CastMember {
+    actor_name: string;
+}
+
+// Connects to getReviews database
+interface Review {
+    review_text: string;
+    review_rating: string;
+}
+
 export function MovieDetails() {
+
+  const { id } = useParams();
+
+  const [movie, setMovie] = useState<Movie | null>(null);
+
+  const [cast, setCast] = useState<CastMember[]>([]);
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+
+  useEffect(() => {
+    fetch(
+        `http://localhost/cinecollect-api/getMovieDetails.php?id=${id}`
+    )
+        .then((response) => response.json())
+        .then((data) => setMovie(data))
+        .catch((error) => console.error(error));
+  }, [id]);
+
+  if (!movie) {
+    return <h2>Loading movie...</h2>;
+  }
+
+  useEffect(() => {
+
+    fetch(
+      `http://localhost/cinecollect-api/getCast.php?movie_id=${id}`
+    )
+      .then((response) => response.json())
+      .then((data) => setCast(data));
+
+  }, [id]);
+
+  useEffect(() => {
+
+    fetch(
+      `http://localhost/cinecollect-api/getReviews.php?movie_id=${id}`
+    )
+      .then((response) => response.json())
+      .then((data) => setReviews(data));
+
+  }, [id]);
+
   return (
     <Container className="py-4">
 
@@ -14,28 +84,29 @@ export function MovieDetails() {
           <Card>
             <Card.Img
               variant="top"
-              src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500"
+              src={movie.image_url}
+              alt={movie.title}
             />
           </Card>
         </Col>
 
         <Col md={8}>
-          <h1>Interstellar</h1>
+          <h1>{movie.title}</h1>
 
           <p>
-            ⭐ <strong>8.9</strong>
+            ⭐ <strong>{movie.rating}</strong>
           </p>
 
           <p>
-            <strong>Genre:</strong> Sci-Fi
+            <strong>Genre:</strong> {movie.genre}
           </p>
 
           <p>
-            <strong>Release Year:</strong> 2014
+            <strong>Release Year:</strong> {movie.release_year}
           </p>
 
           <p>
-            <strong>Runtime:</strong> 169 Minutes
+            <strong>Runtime:</strong> {movie.runtime}
           </p>
 
           <Button href="/review" variant="primary">
@@ -49,8 +120,7 @@ export function MovieDetails() {
           <Card.Title>Synopsis</Card.Title>
 
           <Card.Text>
-            A team of explorers travel through a wormhole
-            in space in an attempt to ensure humanity's survival.
+            {movie.description}
           </Card.Text>
         </Card.Body>
       </Card>
@@ -60,9 +130,11 @@ export function MovieDetails() {
           <Card.Title>Cast</Card.Title>
 
           <ListGroup variant="flush">
-            <ListGroup.Item>Matthew McConaughey</ListGroup.Item>
-            <ListGroup.Item>Anne Hathaway</ListGroup.Item>
-            <ListGroup.Item>Jessica Chastain</ListGroup.Item>
+            {cast.map((actor, index) => (
+              <ListGroup.Item key={index}>
+                  {actor.actor_name}
+              </ListGroup.Item>
+            ))}
           </ListGroup>
         </Card.Body>
       </Card>
@@ -70,14 +142,13 @@ export function MovieDetails() {
       <Card>
         <Card.Body>
           <Card.Title>Community Reviews</Card.Title>
-
-          <p>
-            ⭐⭐⭐⭐⭐ Amazing visuals and storytelling.
-          </p>
-
-          <p>
-            ⭐⭐⭐⭐ Great sci-fi movie with emotional depth.
-          </p>
+          {reviews.map((review, index) => (
+            <p key={index}>
+                ⭐ {review.review_rating}
+                {" "}
+                {review.review_text}
+            </p>
+          ))}
         </Card.Body>
       </Card>
 
