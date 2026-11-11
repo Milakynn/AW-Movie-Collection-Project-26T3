@@ -17,6 +17,25 @@ export function LoginRegister() {
   // This code is for the login
   const loginUser = async () => {
 
+    if (!email.trim()) {
+      alert("Please enter your email.");
+      return;
+    } 
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
+
+    if (!emailPattern.test(email)) {
+      alert(
+          "Please enter a valid Gmail, Outlook, Hotmail, Yahoo, or iCloud email."
+      );
+      return;
+    }
+
+    if (!password.trim()) {
+        alert("Please enter your password.");
+        return;
+    }
+
     const response = await fetch(
       "http://localhost/cinecollect-api/login.php",
       {
@@ -46,9 +65,47 @@ export function LoginRegister() {
   // This code is for the register, it makes the username, password and email being linked to database phpMyAdmin
   const registerUser = async () => {
 
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
+    if (!username.trim()) {
+      alert("Please enter a username.");
       return;
+    }
+
+    if (!email.trim()) {
+        alert("Please enter an email.");
+        return;
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
+
+    if (!emailPattern.test(email)) {
+      alert(
+          "Please enter a valid Gmail, Outlook, Hotmail, Yahoo, or iCloud email."
+      );
+      return;
+    }
+
+    if (!password.trim()) {
+        alert("Please enter a password.");
+        return;
+    }
+
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    const passwordPattern = /^[A-Za-z0-9]+$/;
+
+    if (!passwordPattern.test(password)) {
+      alert(
+          "Password can only contain letters and numbers. No spaces or special characters are allowed."
+      );
+      return;
+    }
+
+    if (password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return;
     }
 
     const response = await fetch(

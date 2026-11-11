@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 10, 2026 at 09:56 AM
+-- Generation Time: Nov 11, 2026 at 09:14 AM
 -- Server version: 10.11.16-MariaDB
 -- PHP Version: 8.3.36
 
@@ -74,7 +74,13 @@ INSERT INTO `movie_cast` (`cast_id`, `movie_id`, `actor_name`) VALUES
 (6, 2, 'Rebecca Ferguson'),
 (7, 3, 'Ryan Gosling'),
 (8, 3, 'Harrison Ford'),
-(9, 3, 'Ana de Armas');
+(9, 3, 'Ana de Armas'),
+(10, 3, 'Ryan Gosling'),
+(11, 3, 'Harrison Ford'),
+(12, 3, 'Ana de Armas'),
+(13, 5, 'Vera Farmiga'),
+(14, 5, 'Patrick Wilson'),
+(15, 5, 'Lili Taylor');
 
 -- --------------------------------------------------------
 
@@ -98,7 +104,11 @@ CREATE TABLE `reviews` (
 INSERT INTO `reviews` (`review_id`, `movie_id`, `user_id`, `review_text`, `review_rating`, `created_at`) VALUES
 (1, 1, 1, 'Amazing visuals and storytelling.', 5, '2026-11-10 08:15:08'),
 (2, 1, 2, 'One of the best sci-fi films ever made.', 5, '2026-11-10 08:15:08'),
-(3, 3, 1, 'Beautiful cinematography.', 5, '2026-11-10 08:15:08');
+(3, 3, 1, 'Beautiful cinematography.', 5, '2026-11-10 08:15:08'),
+(4, 3, 1, 'A visually stunning sci-fi masterpiece.', 5, '2026-11-11 07:37:51'),
+(5, 3, 2, 'Ryan Gosling was excellent.', 4, '2026-11-11 07:37:51'),
+(6, 5, 1, 'One of the scariest horror movies ever made.', 5, '2026-11-11 07:37:51'),
+(7, 5, 2, 'Great performances and atmosphere.', 4, '2026-11-11 07:37:51');
 
 -- --------------------------------------------------------
 
@@ -120,7 +130,8 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`user_id`, `username`, `email`, `password`) VALUES
 (1, 'Lindy', 'lindy@gmail.com', 'LINDY110802'),
 (2, 'Test', 'test@gmail.com', 'TEST1'),
-(3, 'lol', 'lo@outlook.com', 'lol1');
+(3, 'lol', 'lo@outlook.com', 'lol1'),
+(4, 'lin', 'moviefan@yahoo.com', 'MovieFan2026');
 
 --
 -- Indexes for dumped tables
@@ -168,19 +179,19 @@ ALTER TABLE `movies`
 -- AUTO_INCREMENT for table `movie_cast`
 --
 ALTER TABLE `movie_cast`
-  MODIFY `cast_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `cast_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `reviews`
 --
 ALTER TABLE `reviews`
-  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `review_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- Constraints for dumped tables

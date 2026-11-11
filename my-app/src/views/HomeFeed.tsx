@@ -57,6 +57,7 @@ export function HomeFeed() {
           placeholder="Search movies, actors..."
         />
       </Form>
+      <p>Movie Count: {movies.length}</p>
 
       <h2 className="fw-bold mb-4">Trending Now</h2>
       {/* <div className="mb-4">
