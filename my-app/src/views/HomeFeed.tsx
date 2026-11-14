@@ -25,6 +25,8 @@ interface Movie {
 export function HomeFeed() {
   
     const [movies, setMovies] = useState<Movie[]>([]);
+    const [searchTerm, setSearchTerm] = useState<string>("");
+
     useEffect(() => {
     fetch("http://localhost/cinecollect-api/getMovies.php")
         .then((response) => response.json())
@@ -34,6 +36,16 @@ export function HomeFeed() {
         })
         .catch((error) => console.error(error));
     }, []);
+
+    const filteredMovies = movies.filter((movie: Movie) =>
+    {
+      return (
+          movie.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          movie.genre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          movie.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          movie.release_year.includes(searchTerm)
+      );
+    });
 
   return (
     <Container fluid className="bg-dark text-light min-vh-100 p-4">
@@ -54,94 +66,20 @@ export function HomeFeed() {
       <Form className="mb-4">
         <Form.Control
           type="search"
-          placeholder="Search movies, actors..."
+          placeholder="Search movies..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </Form>
-      <p>Movie Count: {movies.length}</p>
 
       <h2 className="fw-bold mb-4">Trending Now</h2>
-      {/* <div className="mb-4">
-    {movies.map((movie) => (
-        <p key={movie.movie_id}>
-        {movie.title}
-        </p>
-    ))}
-    </div> */}
-
-        {/* <Carousel className="mb-5" interval={3000} pause={false}>
-
-        <Carousel.Item>
-            <img
-            className="d-block w-100"
-            src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=1200"
-            alt="Interstellar"
-            style={{
-                height: "400px",
-                objectFit: "cover"
-            }}
-            />
-
-            <Carousel.Caption>
-            <h3>Interstellar</h3>
-            <p>Sci‑Fi Adventure</p>
-
-            <Button href="/movie/1">
-                View Details
-            </Button>
-            </Carousel.Caption>
-        </Carousel.Item>
-
-        <Carousel.Item>
-            <img
-            className="d-block w-100"
-            src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200"
-            alt="Dune"
-            style={{
-                height: "400px",
-                objectFit: "cover"
-            }}
-            />
-
-            <Carousel.Caption>
-            <h3>Dune</h3>
-            <p>Epic Adventure</p>
-
-            <Button href="/movie/2">
-                View Details
-            </Button>
-            </Carousel.Caption>
-        </Carousel.Item>
-
-        <Carousel.Item>
-            <img
-            className="d-block w-100"
-            src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=1200"
-            alt="Blade Runner"
-            style={{
-                height: "400px",
-                objectFit: "cover"
-            }}
-            />
-
-            <Carousel.Caption>
-            <h3>Blade Runner</h3>
-            <p>Cyberpunk Sci‑Fi</p>
-
-            <Button href="/movie/3">
-                View Details
-            </Button>
-            </Carousel.Caption>
-        </Carousel.Item>
-
-        </Carousel> */}
-
         {/* New one */}
         <Carousel
-  className="mb-5"
-  interval={5000}
-  pause={false}
-  wrap={true}
->
+          className="mb-5"
+          interval={5000}
+          pause={false}
+          wrap={true}
+        >
   {movies.map((movie) => (
     <Carousel.Item key={movie.movie_id}>
       <img
@@ -201,58 +139,13 @@ export function HomeFeed() {
         </div>
 
       <h3 className="mt-5 mb-3">Latest Reviews</h3>
-
-        {/* <Row className="g-3">
-            <Col md={4}>
-                <Card bg="secondary" text="light">
-                <Card.Body>
-                    <Card.Title>Interstellar</Card.Title>
-                    <Card.Text>
-                    ⭐⭐⭐⭐⭐ Amazing visuals and storytelling.
-                    </Card.Text>
-                    <Button href="/movie/1" variant="primary">
-                        View Details
-                    </Button>
-                </Card.Body>
-                </Card>
-            </Col>
-
-            <Col md={4}>
-                <Card bg="secondary" text="light">
-                <Card.Body>
-                    <Card.Title>Dune</Card.Title>
-                    <Card.Text>
-                    ⭐⭐⭐⭐ Great world-building and cinematography.
-                    </Card.Text>
-                    <Button href="/movie/2" variant="primary">
-                        View Details
-                    </Button>
-                </Card.Body>
-                </Card>
-            </Col>
-
-            <Col md={4}>
-                <Card bg="secondary" text="light">
-                <Card.Body>
-                    <Card.Title>Blade Runner</Card.Title>
-                    <Card.Text>
-                    ⭐⭐⭐⭐⭐ A timeless sci-fi classic.
-                    </Card.Text>
-                    <Button href="/movie/3" variant="primary">
-                        View Details
-                    </Button>
-                </Card.Body>
-                </Card>
-            </Col>
-        </Row> */}
-
         {/* new one */}
         <h2 className="fw-bold mb-4">
   Browse Movies
 </h2>
 
 <Row className="g-4 mb-5">
-  {movies.map((movie) => (
+  {filteredMovies.map((movie) => (
     <Col md={4} key={movie.movie_id}>
       <Card
         bg="secondary"
@@ -284,6 +177,12 @@ export function HomeFeed() {
           </Button>
         </Card.Body>
       </Card>
+      {filteredMovies.length === 0 && (
+          <h5 className="text-warning">
+              No movies found.
+          </h5>
+      )}
+
     </Col>
   ))}
 </Row>
