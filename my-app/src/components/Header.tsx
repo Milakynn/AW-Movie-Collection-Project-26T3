@@ -7,6 +7,9 @@ import  Form  from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import InputGroup from 'react-bootstrap/InputGroup'
 
+import { useState } from 'react'
+import { useNavigate } from 'react-router'
+
 import {  NavLink } from 'react-router'
 
 interface HeaderProps {
@@ -15,6 +18,10 @@ interface HeaderProps {
 }
 
 export function Header( props:HeaderProps ) {
+
+    const [query, setQuery] = useState("")
+    const navigate = useNavigate()
+
     return (
         <Navbar expand="lg" className="bg-info-subtle" data-bs-theme="dark">
             <Container fluid className='d-flex justify-content-between'>
@@ -22,10 +29,37 @@ export function Header( props:HeaderProps ) {
                    <img src={props.image} style={{maxWidth:"80px"}} /> 
                    <span className='d-none sm:d-block'>{ props.title }</span>
                 </Navbar.Brand>
-                <Form className='flex-grow-1 sm:m-0 mx-4'>
+                {/* <Form className='flex-grow-1 sm:m-0 mx-4'>
                     <InputGroup>
                         <Form.Control type="search" name="query" className='flex-grow-1'/>
                         <Button type="submit" className=''>Search</Button>
+                    </InputGroup>
+                </Form> */}
+                <Form
+                    className='flex-grow-1 sm:m-0 mx-4'
+                    onSubmit={(e) => {
+                        e.preventDefault()
+
+                        navigate(`/?query=${query}`)
+                    }}
+                >
+                    <InputGroup>
+
+                        <Form.Control
+                            type="search"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            placeholder="Search movies..."
+                            className='flex-grow-1'
+                        />
+
+                        <Button type="submit">
+                            Search
+                        </Button>
+                        <Button variant="secondary" onClick={() => navigate("/")}>
+                            Clear
+                        </Button>
+
                     </InputGroup>
                 </Form>
                 <Navbar.Toggle aria-controls="main-nav" />

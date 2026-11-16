@@ -54,10 +54,30 @@ export function LoginRegister() {
 
     // alert(data.message);
     if (data.success) {
+
+      localStorage.setItem(
+        "user_id",
+        data.user.user_id
+      );
+
+      localStorage.setItem(
+        "username",
+        data.user.username
+      );
+
+      localStorage.setItem(
+        "email",
+        data.user.email
+      );
+
       alert("Login successful");
-      window.location.href = "/";
+
+      window.location.href = "/account";
+
     } else {
+
       alert(data.message);
+
     }
 
   };
