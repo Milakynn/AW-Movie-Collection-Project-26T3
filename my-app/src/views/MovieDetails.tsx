@@ -4,6 +4,8 @@ import { Col } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { ListGroup } from "react-bootstrap";
+import { Form } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 //link to backend
 import { useState } from "react";
@@ -31,6 +33,7 @@ interface CastMember {
 interface Review {
     review_text: string;
     review_rating: string;
+    username: string;
 }
 
 export function MovieDetails() {
@@ -42,6 +45,12 @@ export function MovieDetails() {
   const [cast, setCast] = useState<CastMember[]>([]);
 
   const [reviews, setReviews] = useState<Review[]>([]);
+
+  const [showReviewModal, setShowReviewModal] = useState(false);
+
+  const [rating, setRating] = useState("");
+
+  const [reviewText, setReviewText] = useState("");
 
   useEffect(() => {
     fetch(
@@ -83,6 +92,61 @@ export function MovieDetails() {
     return <h2>Loading movie...</h2>;
   }
 
+  const publishReview = async () => {
+
+    const userId = localStorage.getItem("user_id");
+
+    if (!rating) {
+    alert("Please select a rating.");
+    return;
+  }
+
+  if (!reviewText.trim()) {
+    alert("Please enter a review.");
+    return;
+  }
+
+    const response = await fetch(
+      "http://localhost/cinecollect-api/addReview.php",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          movie_id: id, // current movie
+          review_rating: rating,
+          review_text: reviewText
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+
+      alert("Review published!");
+
+      fetch(
+        `http://localhost/cinecollect-api/getReviews.php?movie_id=${id}`
+      )
+        .then((response) => response.json())
+        .then((data) => setReviews(data));
+
+      setShowReviewModal(false);
+
+      setRating("");
+      setReviewText("");
+
+    } else {
+
+      alert(data.message);
+
+    }
+
+  };
+
   return (
     <Container className="py-4">
 
@@ -116,7 +180,7 @@ export function MovieDetails() {
             <strong>Runtime:</strong> {movie.runtime}
           </p>
 
-          <Button href="/review" variant="primary">
+          <Button variant="primary" onClick={() => setShowReviewModal(true)}>
             Write a Review
           </Button>
         </Col>
@@ -148,17 +212,113 @@ export function MovieDetails() {
 
       <Card>
         <Card.Body>
-          <Card.Title>Community Reviews</Card.Title>
+
+          <Card.Title>
+            Community Reviews
+          </Card.Title>
+
+          {reviews.length === 0 && (
+            <p>No reviews yet.</p>
+          )}
+
           {reviews.map((review, index) => (
-            <p key={index}>
-                ⭐ {review.review_rating}
-                {" "}
-                {review.review_text}
-            </p>
+
+            <Card
+              key={index}
+              className="mb-2"
+            >
+              <Card.Body>
+
+                <h6 className="mb-2">
+                  ⭐ {review.review_rating}/5
+                </h6>
+
+                <p className="mb-2">
+                  {review.review_text}
+                </p>
+
+                <small className="text-muted">
+                  Reviewed by {review.username}
+                </small>
+
+              </Card.Body>
+            </Card>
+
           ))}
+
         </Card.Body>
       </Card>
 
+          <Modal show={showReviewModal} onHide={() => setShowReviewModal(false)} centered size="lg">
+            <Modal.Header closeButton>
+              <Modal.Title>
+                Review {movie?.title}
+              </Modal.Title>
+            </Modal.Header>
+
+            <Modal.Body>
+
+              <Form.Group className="mb-3">
+
+                <Form.Label>
+                  Rating
+                </Form.Label>
+
+                <Form.Select
+                  value={rating}
+                  onChange={(e) =>
+                    setRating(e.target.value)
+                  }
+                >
+                  <option value="">
+                    Select Rating
+                  </option>
+
+                  <option value="1">⭐ 1</option>
+                  <option value="2">⭐ 2</option>
+                  <option value="3">⭐ 3</option>
+                  <option value="4">⭐ 4</option>
+                  <option value="5">⭐ 5</option>
+
+                </Form.Select>
+
+              </Form.Group>
+
+              <Form.Group>
+
+                <Form.Label>
+                  Review
+                </Form.Label>
+
+                <Form.Control as="textarea" rows={4} value={reviewText}
+                  onChange={(e) =>
+                    setReviewText(e.target.value)
+                  }
+                  placeholder="Share your thoughts about this movie..."
+                />
+
+              </Form.Group>
+
+            </Modal.Body>
+
+            <Modal.Footer>
+
+              <Button
+                variant="secondary"
+                onClick={() => setShowReviewModal(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button variant="primary" onClick={publishReview}>
+                Submit Review
+              </Button>
+
+            </Modal.Footer>
+
+          </Modal>
     </Container>
+    
   );
+  
 }

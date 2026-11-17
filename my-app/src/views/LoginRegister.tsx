@@ -22,7 +22,8 @@ export function LoginRegister() {
       return;
     } 
 
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
+    const emailPattern =
+/^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
 
     if (!emailPattern.test(email)) {
       alert(
@@ -95,7 +96,8 @@ export function LoginRegister() {
         return;
     }
 
-    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
+    const emailPattern =
+/^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
 
     if (!emailPattern.test(email)) {
       alert(
@@ -145,7 +147,32 @@ export function LoginRegister() {
 
     const data = await response.json();
 
-    alert(data.message);
+    if (data.success) {
+
+      localStorage.setItem(
+        "user_id",
+        data.user_id
+      );
+
+      localStorage.setItem(
+        "username",
+        username
+      );
+
+      localStorage.setItem(
+        "email",
+        email
+      );
+
+      alert("Registration successful!");
+
+      window.location.href = "/account";
+
+    } else {
+
+      alert(data.message);
+
+    }
   };
 
   return (

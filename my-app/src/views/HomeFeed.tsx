@@ -4,6 +4,8 @@ import { Col } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { Carousel }  from "react-bootstrap";
+import { Form } from "react-bootstrap";
+import { Modal } from "react-bootstrap";
 
 import { useEffect } from "react";
 import { useState } from "react";
@@ -27,6 +29,51 @@ export function HomeFeed() {
     const searchTerm = searchParams.get("query") || "";
     const [selectedGenre, setSelectedGenre] = useState<string>("All");
 
+    const [title, setTitle] = useState("");
+  const [genre, setGenre] = useState("");
+  const [description, setDescription] = useState("");
+  const [releaseYear, setReleaseYear] = useState("");
+  const [runtime, setRuntime] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [rating, setRating] = useState("");
+
+  const addMovie = async () => {
+
+    const response = await fetch(
+      "http://localhost/cinecollect-api/addMovie.php",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          genre,
+          description,
+          release_year: releaseYear,
+          runtime,
+          image_url: imageUrl,
+          rating
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+
+      alert("Movie added!");
+
+      window.location.href = "/";
+
+    } else {
+
+      alert(data.message);
+
+    }
+
+  };
+
     useEffect(() => {
     fetch("http://localhost/cinecollect-api/getMovies.php")
         .then((response) => response.json())
@@ -48,7 +95,7 @@ export function HomeFeed() {
 
       try {
         const response = await fetch(
-          "http://localhost/cinecollect-api/addFavorite.php",
+          "http://localhost/cinecollect-api/addFavorites.php",
           {
             method: "POST",
             headers: {
@@ -107,39 +154,39 @@ export function HomeFeed() {
           pause={false}
           wrap={true}
         >
-  {movies.map((movie) => (
-    <Carousel.Item key={movie.movie_id}>
-      <img
-        className="d-block w-100"
-        src={
-          movie.image_url ||
-          "https://via.placeholder.com/1200x400"
-        }
-        alt={movie.title}
-        style={{
-          height: "400px",
-          objectFit: "cover"
-        }}
-      />
+        {movies.map((movie) => (
+          <Carousel.Item key={movie.movie_id}>
+            <img
+              className="d-block w-100"
+              src={
+                movie.image_url ||
+                "https://via.placeholder.com/1200x400"
+              }
+              alt={movie.title}
+              style={{
+                height: "400px",
+                objectFit: "cover"
+              }}
+            />
 
-      <Carousel.Caption>
-        <h3>{movie.title}</h3>
+            <Carousel.Caption>
+              <h3>{movie.title}</h3>
 
-        <p>
-          ⭐ {movie.rating} • {movie.genre}
-        </p>
+              <p>
+                ⭐ {movie.rating} • {movie.genre}
+              </p>
 
-        <Button
-          href={`/movie/${movie.movie_id}`}
-        >
-          View Details
-        </Button>
-      </Carousel.Caption>
-    </Carousel.Item>
-  ))}
-</Carousel>
-</>
-)}
+              <Button
+                href={`/movie/${movie.movie_id}`}
+              >
+                View Details
+              </Button>
+            </Carousel.Caption>
+          </Carousel.Item>
+        ))}
+      </Carousel>
+      </>
+      )}
 
       <h2 className="fw-bold mb-3">Categories</h2>
         <div className="d-flex flex-wrap gap-2 mb-5">
@@ -211,6 +258,19 @@ export function HomeFeed() {
                 text="light"
                 className="h-100"
               >
+                <Card.Img variant="top"
+                  src={movie.image_url}
+                  alt={movie.title}
+                  onClick={() =>
+                    window.location.href =
+                      `/movie/${movie.movie_id}`
+                  }
+                  style={{
+                    height: "300px",
+                    objectFit: "cover",
+                    cursor: "pointer"
+                  }}
+                />
                 <Card.Body>
                   <Card.Title>
                     {movie.title}
@@ -225,7 +285,7 @@ export function HomeFeed() {
                   </Card.Text>
 
                   <Card.Text>
-                    {movie.description.substring(0, 100)}...
+                    {movie.description.substring(0, 80)}...
                   </Card.Text>
 
                   <Button
@@ -258,6 +318,21 @@ export function HomeFeed() {
         }}
         >
         + Write Review
+        </Button>
+
+        <Button
+          href="/add-movie"
+          variant="success"
+          style={{
+            position: "fixed",
+            bottom: "90px",
+            right: "30px",
+            borderRadius: "50px",
+            padding: "12px 20px",
+            zIndex: 1000
+          }}
+        >
+          + Add Movie
         </Button>
 
     </Container>

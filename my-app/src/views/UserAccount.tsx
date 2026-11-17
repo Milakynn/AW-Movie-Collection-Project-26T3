@@ -4,6 +4,7 @@ import { Col } from "react-bootstrap";
 import { Card } from "react-bootstrap";
 import { Button } from "react-bootstrap";
 import { ListGroup } from "react-bootstrap";
+import { Form } from "react-bootstrap";
 
 import { useEffect } from "react";
 import { useState } from "react";
@@ -16,13 +17,30 @@ interface Favorite {
     image_url: string;
 }
 
+interface Review {
+  review_id: string;
+  title: string;
+  review_text: string;
+  review_rating: string;
+}
+
 export function UserAccount() {
   
   const [favorites, setFavorites] = useState<Favorite[]>([]);
 
-  const username = localStorage.getItem("username") || "";
+  const [reviews, setReviews] = useState<Review[]>([]);
 
-  const email = localStorage.getItem("email") || "";
+  const [username, setUsername] = useState(
+    localStorage.getItem("username") || ""
+  );
+
+  const [email, setEmail] = useState(
+    localStorage.getItem("email") || ""
+  );
+
+  const [password, setPassword] = useState("");
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const [reviewCount, setReviewCount] = useState(0);
 
@@ -73,6 +91,15 @@ export function UserAccount() {
       setFavoriteGenre(data.genre);
     });
 
+    {/**---------------------SET USER REVIEWS----------------------- */}
+    fetch(
+      `http://localhost/cinecollect-api/getUserReviews.php?user_id=${userId}`
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        setReviews(data);
+      });
+
   }, []);
 
   const removeFavorite = async (
@@ -82,7 +109,7 @@ export function UserAccount() {
       try {
 
           const response = await fetch(
-              "http://localhost/cinecollect-api/removeFavorite.php",
+              "http://localhost/cinecollect-api/removeFavorites.php",
               {
                   method: "POST",
                   headers: {
@@ -103,11 +130,129 @@ export function UserAccount() {
               )
           );
 
+          setFavoriteCount(
+            favoriteCount - 1
+          );
+
       } catch (error) {
 
           console.error(error);
 
       }
+  };
+
+  const deleteReview = async (
+    reviewId: string
+  ) => {
+
+    try {
+
+      if(!window.confirm(
+              "Delete this review?"
+          )
+      ){
+          return;
+      }
+
+        const response = await fetch(
+            "http://localhost/cinecollect-api/deleteReview.php",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    review_id: reviewId
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if(data.success){
+
+            setReviews(
+                reviews.filter(
+                    (review) =>
+                        review.review_id !== reviewId
+                )
+            );
+
+            setReviewCount(
+                reviewCount - 1
+            );
+
+        }
+
+    } catch(error){
+
+        console.error(error);
+
+    }
+
+  };
+
+  const updateProfile = async () => {
+
+    const userId = localStorage.getItem("user_id");
+
+    if (!username.trim()) {
+      alert("Please enter a username.");
+      return;
+    }
+
+    if (!email.trim()) {
+      alert("Please enter an email.");
+      return;
+    }
+
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail|outlook|hotmail|yahoo|icloud)\.(com|com.au|net|org)$/;
+    if (!emailPattern.test(email)) {
+      alert("Please enter a valid email.");
+      return;
+    }
+
+    const response = await fetch(
+      "http://localhost/cinecollect-api/updateProfile.php",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          username,
+          email,
+          password
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if(data.success){
+
+      localStorage.setItem(
+        "username",
+        username
+      );
+
+      localStorage.setItem(
+        "email",
+        email
+      );
+
+      alert("Profile updated");
+
+      setPassword("");
+
+      setIsEditing(false);
+
+    } else {
+
+      alert(data.message);
+
+    }
   };
 
   return (
@@ -129,12 +274,64 @@ export function UserAccount() {
                 Member since 2026
               </p>
 
-              <Button variant="primary">
-                Edit Profile
+              <Button variant="primary" onClick={() => setIsEditing(!isEditing)}>
+                {isEditing ? "Cancel" : "Edit Profile"}
               </Button>
 
             </Card.Body>
           </Card>
+
+          {isEditing && (
+
+            <Card className="mb-4">
+              <Card.Body>
+
+                <h4>Edit Profile</h4>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Username</Form.Label>
+
+                  <Form.Control
+                    value={username}
+                    onChange={(e) =>
+                      setUsername(e.target.value)
+                    }
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Email</Form.Label>
+
+                  <Form.Control
+                    value={email}
+                    onChange={(e) =>
+                      setEmail(e.target.value)
+                    }
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>New Password</Form.Label>
+
+                  <Form.Control
+                    type="password"
+                    value={password}
+                    onChange={(e) =>
+                      setPassword(e.target.value)
+                    }
+                  />
+                </Form.Group>
+
+                <Button
+                  onClick={updateProfile}
+                >
+                  Save Changes
+                </Button>
+
+              </Card.Body>
+            </Card>
+
+          )}
 
           <Row className="mb-4">
 
@@ -164,8 +361,39 @@ export function UserAccount() {
                 </Card.Body>
               </Card>
             </Col>
-
           </Row>
+
+          <Card>
+            <Card.Body>
+              <Card.Title>Quick Actions</Card.Title>
+
+              <div className="d-grid gap-2">
+                <Button variant="outline-primary"
+                  onClick={() => {
+                    document
+                      .getElementById("my-favorites")
+                      ?.scrollIntoView({
+                        behavior: "smooth"
+                      });
+                  }}
+                >
+                  Manage Watchlist ({favoriteCount})
+                </Button>
+
+                <Button variant="outline-secondary"
+                  onClick={() => {
+                    document
+                      .getElementById("my-reviews")
+                      ?.scrollIntoView({
+                        behavior: "smooth"
+                      });
+                  }}
+                >
+                  View My Reviews ({reviewCount})
+                </Button>
+              </div>
+            </Card.Body>
+          </Card>
 
           <Card className="mb-4">
             <Card.Body>
@@ -188,7 +416,7 @@ export function UserAccount() {
             </Card.Body>
           </Card>
 
-          <Card className="mb-4">
+          <Card className="mb-4" id="my-favorites">
             <Card.Body>
 
                 <Card.Title>
@@ -235,36 +463,75 @@ export function UserAccount() {
             </Card.Body>
           </Card>
 
-          <Card>
+          <Card className="mb-4" id="my-reviews">
             <Card.Body>
-              <Card.Title>Quick Actions</Card.Title>
 
-              <div className="d-grid gap-2">
-                <Button variant="outline-primary">
-                  Manage Watchlist
-                </Button>
+              <Card.Title>
+                My Reviews
+              </Card.Title>
 
-                <Button variant="outline-secondary">
-                  View My Reviews
-                </Button>
+              {reviews.length === 0 && (
+                <p>No reviews yet.</p>
+              )}
 
-                <Button variant="outline-danger"
-                  onClick={() => {
+              {reviews.map((review) => (
 
-                    localStorage.removeItem("user_id");
-                    localStorage.removeItem("username");
-                    localStorage.removeItem("email");
-
-                    window.location.href = "/login";
-
-                  }}
+                <Card
+                  key={review.review_id}
+                  className="mb-2"
                 >
-                  Sign Out
-                </Button>
-              </div>
+                  <Card.Body>
+
+                    <h5>
+                      {review.title}
+                    </h5>
+
+                    <p>
+                      ⭐ {review.review_rating}/5
+                    </p>
+
+                    <p>
+                      {review.review_text}
+                    </p>
+
+                    <Button variant="outline-danger" size="sm"
+                      onClick={() =>
+                            deleteReview(
+                                review.review_id
+                            )
+                        }
+                    >
+                        Delete Review
+                    </Button>
+
+                  </Card.Body>
+                </Card>
+
+              ))}
+
             </Card.Body>
           </Card>
 
+          <Card className="mt-4">
+            <Card.Body className="text-center">
+
+              <Button
+                variant="danger"
+                onClick={() => {
+
+                  localStorage.removeItem("user_id");
+                  localStorage.removeItem("username");
+                  localStorage.removeItem("email");
+
+                  window.location.href = "/login";
+
+                }}
+              >
+                Sign Out
+              </Button>
+
+            </Card.Body>
+          </Card>
         </Col>
       </Row>
     </Container>
