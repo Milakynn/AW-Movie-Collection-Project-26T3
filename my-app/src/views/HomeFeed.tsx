@@ -30,14 +30,66 @@ export function HomeFeed() {
     const [selectedGenre, setSelectedGenre] = useState<string>("All");
 
     const [title, setTitle] = useState("");
-  const [genre, setGenre] = useState("");
-  const [description, setDescription] = useState("");
-  const [releaseYear, setReleaseYear] = useState("");
-  const [runtime, setRuntime] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [rating, setRating] = useState("");
+    const [genre, setGenre] = useState("");
+    const [description, setDescription] = useState("");
+    const [releaseYear, setReleaseYear] = useState("");
+    const [runtime, setRuntime] = useState("");
+    const [imageUrl, setImageUrl] = useState("");
+    const [rating, setRating] = useState("");
+    const [cast, setCast] = useState("");
+    const [showAddMovieModal, setShowAddMovieModal] = useState(false);
 
   const addMovie = async () => {
+
+    if (!title.trim()) {
+      alert("Please enter a movie title.");
+      return;
+    }
+
+    if (!genre) {
+      alert("Please select a genre.");
+      return;
+    }
+
+    if (!releaseYear.trim()) {
+      alert("Please enter a release year.");
+      return;
+    }
+
+    if (!/^\d{4}$/.test(releaseYear)) {
+      alert("Release year must be 4 digits.");
+      return;
+    }
+
+    if (!runtime.trim()) {
+      alert("Please enter a runtime.");
+      return;
+    }
+
+    if (!/^\d+\s*min$/i.test(runtime)) {
+      alert("Runtime must be in format: 125 min");
+      return;
+    }
+
+    if (!imageUrl.trim()) {
+      alert("Please enter a poster URL.");
+      return;
+    }
+
+    if (!rating) {
+      alert("Please select a rating.");
+      return;
+    }
+
+    if (!cast.trim()) {
+      alert("Please enter at least one cast member.");
+      return;
+    }
+
+    if (!description.trim()) {
+      alert("Please enter a movie description.");
+      return;
+    }
 
     const response = await fetch(
       "http://localhost/cinecollect-api/addMovie.php",
@@ -53,18 +105,35 @@ export function HomeFeed() {
           release_year: releaseYear,
           runtime,
           image_url: imageUrl,
-          rating
+          rating,
+          cast
         })
       }
     );
 
     const data = await response.json();
+    // const text = await response.text();
+
+    // console.log(text);
 
     if (data.success) {
 
       alert("Movie added!");
 
-      window.location.href = "/";
+      fetch("http://localhost/cinecollect-api/getMovies.php")
+        .then((response) => response.json())
+        .then((data) => setMovies(data));
+
+      setShowAddMovieModal(false);
+
+      setTitle("");
+      setGenre("");
+      setDescription("");
+      setReleaseYear("");
+      setRuntime("");
+      setImageUrl("");
+      setRating("");
+        setCast("");
 
     } else {
 
@@ -117,6 +186,59 @@ export function HomeFeed() {
       } catch (error) {
         console.error(error);
       }
+    };
+
+    const deleteMovie = async (
+      movieId: string
+    ) => {
+
+      if (
+        !window.confirm(
+          "Are you sure you want to delete this movie?"
+        )
+      ) {
+        return;
+      }
+
+      try {
+
+        const response = await fetch(
+          "http://localhost/cinecollect-api/deleteMovie.php",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              movie_id: movieId
+            })
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (data.success) {
+
+          setMovies(
+            movies.filter(
+              (movie) =>
+                movie.movie_id !== movieId
+            )
+          );
+
+        } else {
+
+          alert(data.message);
+
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+      }
+
     };
 
     const filteredMovies = movies.filter((movie: Movie) => {
@@ -295,12 +417,27 @@ export function HomeFeed() {
                     View Details
                   </Button>
 
-                  <Button
-                    variant="outline-danger"
+                  <Button variant="outline-danger" className="ms-2"
                     onClick={() => addToFavorites(movie.movie_id)}
                   >
                     ❤ Favorite
                   </Button>
+
+                  {
+                    localStorage.getItem("user_id") && (
+
+                      <Button
+                        variant="outline-warning"
+                        className="ms-2"
+                        onClick={() =>
+                          deleteMovie(movie.movie_id)
+                        }
+                      >
+                        Delete
+                      </Button>
+
+                    )
+                  }
                 </Card.Body>
               </Card>
             </Col>
@@ -320,20 +457,179 @@ export function HomeFeed() {
         + Write Review
         </Button>
 
-        <Button
-          href="/add-movie"
-          variant="success"
-          style={{
-            position: "fixed",
-            bottom: "90px",
-            right: "30px",
-            borderRadius: "50px",
-            padding: "12px 20px",
-            zIndex: 1000
-          }}
+      {
+        localStorage.getItem("user_id") && (
+          <Button variant="success" onClick={() => setShowAddMovieModal(true)}
+            style={{
+              position: "fixed",
+              bottom: "90px",
+              right: "30px",
+              borderRadius: "50px",
+              padding: "12px 20px",
+              zIndex: 1000
+            }}
+          >
+            + Add Movie
+          </Button>
+        )
+      }
+
+        <Modal show={showAddMovieModal}
+          onHide={() =>
+            setShowAddMovieModal(false)
+          }
+          centered
+          size="lg"
         >
-          + Add Movie
+          <Modal.Header closeButton>
+            <Modal.Title>
+              Add New Movie
+            </Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body>
+
+            <Form.Control
+              className="mb-3"
+              placeholder="Movie Title"
+              value={title}
+              onChange={(e) =>
+                setTitle(e.target.value)
+              }
+            />
+
+            <Form.Select
+              className="mb-3"
+              value={genre}
+              onChange={(e) =>
+                setGenre(e.target.value)
+              }
+            >
+              <option value="">
+                Select Genre
+              </option>
+
+              <option value="Action">
+                Action
+              </option>
+
+              <option value="Romance">
+                Romance
+              </option>
+
+              <option value="Thriller">
+                Thriller
+              </option>
+
+              <option value="Horror">
+                Horror
+              </option>
+
+              <option value="Sci-Fi">
+                Sci-Fi
+              </option>
+            </Form.Select>
+
+            <Form.Control
+              className="mb-3"
+              placeholder="Release Year"
+              value={releaseYear}
+              onChange={(e) =>
+                setReleaseYear(e.target.value)
+              }
+            />
+
+            <Form.Control
+              className="mb-3"
+              placeholder="Runtime"
+              value={runtime}
+              onChange={(e) =>
+                setRuntime(e.target.value)
+              }
+            />
+
+            <Form.Control
+              className="mb-3"
+              placeholder="Poster URL"
+              value={imageUrl}
+              onChange={(e) =>
+                setImageUrl(e.target.value)
+              }
+            />
+
+            <Form.Select className="mb-3" value={rating}
+              onChange={(e) =>
+                setRating(e.target.value)
+              }
+            >
+              <option value="">
+                Select Rating
+              </option>
+
+              <option value="1">
+                ⭐ 1
+              </option>
+
+              <option value="2">
+                ⭐ 2
+              </option>
+
+              <option value="3">
+                ⭐ 3
+              </option>
+
+              <option value="4">
+                ⭐ 4
+              </option>
+
+              <option value="5">
+                ⭐ 5
+              </option>
+
+            </Form.Select>
+
+            <Form.Control
+              className="mb-3"
+              placeholder="Cast (comma separated)"
+              value={cast}
+              onChange={(e) =>
+                setCast(e.target.value)
+              }
+            />
+
+            <Form.Control
+              as="textarea"
+              rows={4}
+              placeholder="Movie Description"
+              value={description}
+              onChange={(e) =>
+                setDescription(e.target.value)
+              }
+            />
+
+          </Modal.Body>
+
+      <Modal.Footer>
+
+        <Button
+          variant="secondary"
+          onClick={() =>
+            setShowAddMovieModal(false)
+          }
+        >
+          Cancel
         </Button>
+
+        <Button
+          variant="success"
+          onClick={addMovie}
+        >
+          Add Movie
+        </Button>
+
+      </Modal.Footer>
+
+    </Modal>
 
     </Container>
   );
