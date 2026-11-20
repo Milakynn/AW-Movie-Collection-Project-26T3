@@ -51,8 +51,7 @@ export function UserAccount() {
 
   useEffect(() => {
 
-    const userId =
-      localStorage.getItem("user_id");
+    const userId = localStorage.getItem("user_id");
 
     if (!userId) return;
 
@@ -270,6 +269,15 @@ export function UserAccount() {
               />
 
               <h2>{username}</h2>
+              {
+                localStorage.getItem("is_admin") === "1" && (
+
+                  <p className="text-warning fw-bold">
+                    👑 Administrator
+                  </p>
+
+                )
+              }
               <p className="text-muted">
                 Member since 2026
               </p>
@@ -522,6 +530,7 @@ export function UserAccount() {
                   localStorage.removeItem("user_id");
                   localStorage.removeItem("username");
                   localStorage.removeItem("email");
+                  localStorage.removeItem("is_admin");
 
                   window.location.href = "/login";
 

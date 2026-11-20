@@ -71,6 +71,13 @@ export function LoginRegister() {
         data.user.email
       );
 
+      console.log(data.user);
+
+      localStorage.setItem(
+        "is_admin",
+        data.user.is_admin
+      );
+
       alert("Login successful");
 
       window.location.href = "/account";
@@ -162,6 +169,11 @@ export function LoginRegister() {
       localStorage.setItem(
         "email",
         email
+      );
+
+      localStorage.setItem(
+        "is_admin",
+        "0"
       );
 
       alert("Registration successful!");

@@ -424,7 +424,7 @@ export function HomeFeed() {
                   </Button>
 
                   {
-                    localStorage.getItem("user_id") && (
+                    localStorage.getItem("is_admin") === "1" && (
 
                       <Button
                         variant="outline-warning"
@@ -458,7 +458,7 @@ export function HomeFeed() {
         </Button>
 
       {
-        localStorage.getItem("user_id") && (
+        localStorage.getItem("is_admin") === "1" && (
           <Button variant="success" onClick={() => setShowAddMovieModal(true)}
             style={{
               position: "fixed",
