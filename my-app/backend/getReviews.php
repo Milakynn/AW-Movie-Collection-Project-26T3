@@ -7,9 +7,16 @@ include("db.php");
 
 $movie_id = $_GET["movie_id"];
 
-$sql = "SELECT review_text, review_rating
-        FROM reviews
-        WHERE movie_id = $movie_id";
+$sql = "SELECT
+    reviews.review_text,
+    reviews.review_rating,
+    users.username
+FROM reviews
+
+JOIN users
+ON reviews.user_id = users.user_id
+
+WHERE reviews.movie_id = '$movie_id'";
 
 $result = $conn->query($sql);
 

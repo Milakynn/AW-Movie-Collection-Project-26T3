@@ -24,9 +24,13 @@ $sql = "INSERT INTO users (username, email, password)
 VALUES ('$username', '$email', '$password')";
 
 if ($conn->query($sql) === TRUE) {
+
+    $user_id = $conn->insert_id;
+
     echo json_encode([
         "success" => true,
-        "message" => "User registered successfully"
+        "message" => "User registered successfully",
+        "user_id" => $user_id
     ]);
 } else {
     echo json_encode([
