@@ -147,8 +147,31 @@ export function HomeFeed() {
     fetch("http://localhost/cinecollect-api/getMovies.php")
         .then((response) => response.json())
         .then((data) => {
-        setMovies(data);
-        console.log(data);
+
+          const shuffledMovies = [...data];
+
+          for (
+            let i = shuffledMovies.length - 1;
+            i > 0;
+            i--
+          ) {
+
+            const j = Math.floor(
+              Math.random() * (i + 1)
+            );
+
+            [
+              shuffledMovies[i],
+              shuffledMovies[j]
+            ] = [
+              shuffledMovies[j],
+              shuffledMovies[i]
+            ];
+
+          }
+
+          setMovies(shuffledMovies);
+
         })
         .catch((error) => console.error(error));
     }, []);
